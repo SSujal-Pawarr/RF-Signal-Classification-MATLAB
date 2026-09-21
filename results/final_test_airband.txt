@@ -1,0 +1,31 @@
+============================================================
+             RF SIGNAL CLASSIFICATION REPORT
+============================================================
+
+Test image                 : /MATLAB Drive/RF-Signal-Classification-MATLAB/Test/airband.png
+Neural network prediction  : airband
+Model confidence           : 99.99%
+UNKNOWN threshold          : 93.05%
+Final prediction           : airband
+
+Decision                  : KNOWN SIGNAL
+Grad-CAM                  : GENERATED
+Heatmap                   : /MATLAB Drive/RF-Signal-Classification-MATLAB/results/gradcam_airband_heatmap.png
+Overlay                   : /MATLAB Drive/RF-Signal-Classification-MATLAB/results/gradcam_airband_overlay.png
+
+------------------------------------------------------------
+CLASS PROBABILITIES
+------------------------------------------------------------
+
+RS41-Radiosonde        :    0.00%
+airband                :   99.99%
+ais                    :    0.00%
+bluetooth              :    0.00%
+cellular               :    0.00%
+fm                     :    0.00%
+lora                   :    0.00%
+wifi                   :    0.00%
+
+============================================================
+END OF REPORT
+============================================================
