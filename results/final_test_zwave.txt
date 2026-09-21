@@ -1,0 +1,29 @@
+============================================================
+             RF SIGNAL CLASSIFICATION REPORT
+============================================================
+
+Test image                 : /MATLAB Drive/RF-Signal-Classification-MATLAB/Test/zwave.png
+Neural network prediction  : lora
+Model confidence           : 92.92%
+UNKNOWN threshold          : 93.05%
+Final prediction           : UNKNOWN
+
+Decision                  : UNKNOWN SIGNAL
+Grad-CAM                  : NOT GENERATED
+
+------------------------------------------------------------
+CLASS PROBABILITIES
+------------------------------------------------------------
+
+RS41-Radiosonde        :    0.00%
+airband                :    0.00%
+ais                    :    0.00%
+bluetooth              :    0.04%
+cellular               :    0.00%
+fm                     :    7.02%
+lora                   :   92.92%
+wifi                   :    0.02%
+
+============================================================
+END OF REPORT
+============================================================

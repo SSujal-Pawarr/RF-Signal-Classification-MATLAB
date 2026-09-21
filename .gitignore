@@ -1,0 +1,32 @@
+# ============================================================
+# RF Signal Classification - Git Ignore
+# ============================================================
+
+# Large datasets
+data/dataset/
+
+# Sample images - ignore if you don't want to upload them
+data/sample_images/
+
+# MATLAB temporary/autosave files
+*.asv
+*.m~
+*.autosave
+
+# MATLAB generated files
+slprj/
+*.slxc
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# VS Code settings
+.vscode/
+
+# Python cache (if used later)
+__pycache__/
+*.pyc
+
+# Logs
+*.log

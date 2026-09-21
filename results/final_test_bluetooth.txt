@@ -1,0 +1,31 @@
+============================================================
+             RF SIGNAL CLASSIFICATION REPORT
+============================================================
+
+Test image                 : /MATLAB Drive/RF-Signal-Classification-MATLAB/Test/bluetooth.png
+Neural network prediction  : bluetooth
+Model confidence           : 99.94%
+UNKNOWN threshold          : 93.05%
+Final prediction           : bluetooth
+
+Decision                  : KNOWN SIGNAL
+Grad-CAM                  : GENERATED
+Heatmap                   : /MATLAB Drive/RF-Signal-Classification-MATLAB/results/gradcam_bluetooth_heatmap.png
+Overlay                   : /MATLAB Drive/RF-Signal-Classification-MATLAB/results/gradcam_bluetooth_overlay.png
+
+------------------------------------------------------------
+CLASS PROBABILITIES
+------------------------------------------------------------
+
+RS41-Radiosonde        :    0.00%
+airband                :    0.00%
+ais                    :    0.01%
+bluetooth              :   99.94%
+cellular               :    0.00%
+fm                     :    0.00%
+lora                   :    0.06%
+wifi                   :    0.00%
+
+============================================================
+END OF REPORT
+============================================================

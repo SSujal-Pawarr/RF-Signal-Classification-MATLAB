@@ -1,0 +1,31 @@
+============================================================
+             RF SIGNAL CLASSIFICATION REPORT
+============================================================
+
+Test image                 : /MATLAB Drive/RF-Signal-Classification-MATLAB/Test/RS41-Radiosonde.png
+Neural network prediction  : RS41-Radiosonde
+Model confidence           : 100.00%
+UNKNOWN threshold          : 93.05%
+Final prediction           : RS41-Radiosonde
+
+Decision                  : KNOWN SIGNAL
+Grad-CAM                  : GENERATED
+Heatmap                   : /MATLAB Drive/RF-Signal-Classification-MATLAB/results/gradcam_RS41-Radiosonde_heatmap.png
+Overlay                   : /MATLAB Drive/RF-Signal-Classification-MATLAB/results/gradcam_RS41-Radiosonde_overlay.png
+
+------------------------------------------------------------
+CLASS PROBABILITIES
+------------------------------------------------------------
+
+RS41-Radiosonde        :  100.00%
+airband                :    0.00%
+ais                    :    0.00%
+bluetooth              :    0.00%
+cellular               :    0.00%
+fm                     :    0.00%
+lora                   :    0.00%
+wifi                   :    0.00%
+
+============================================================
+END OF REPORT
+============================================================
