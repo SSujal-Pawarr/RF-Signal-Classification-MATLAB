@@ -379,6 +379,49 @@ if size(validationScores, 1) ~= numel(YTrue)
 end
 
 %% ============================================================
+% GET NETWORK CLASS ORDER
+% ============================================================
+
+%
+% The trained network's actual output class order is used
+% as the source of truth for score columns.
+%
+
+netClasses = string( ...
+    net.Layers(end).Classes);
+
+%% ============================================================
+% VERIFY NETWORK CLASS COUNT
+% ============================================================
+
+if numel(netClasses) ~= numel(classes)
+
+    error( ...
+        ['Network class count (%d) does not match the ', ...
+         'configured class count (%d).'], ...
+        numel(netClasses), ...
+        numel(classes));
+
+end
+
+%% ============================================================
+% VERIFY NETWORK CLASS ORDER
+% ============================================================
+
+if ~isequal( ...
+        netClasses(:), ...
+        classes(:))
+
+    error( ...
+        ['Network class order does not match the configured ', ...
+         'class order.\n\nNetwork classes:\n%s\n\n', ...
+         'Configured classes:\n%s'], ...
+        strjoin(netClasses, ", "), ...
+        strjoin(classes, ", "));
+
+end
+
+%% ============================================================
 % CONFUSION MATRIX
 % ============================================================
 
@@ -477,50 +520,6 @@ for i = 1:numClasses
 end
 
 %% ============================================================
-% GET NETWORK CLASS ORDER
-% ============================================================
-
-%
-% IMPORTANT:
-% The trained network's actual output class order is the
-% source of truth for confidence-score columns.
-%
-
-netClasses = string( ...
-    net.Layers(end).Classes);
-
-%% ============================================================
-% VERIFY NETWORK CLASS COUNT
-% ============================================================
-
-if numel(netClasses) ~= numel(classes)
-
-    error( ...
-        ['Network class count (%d) does not match the ', ...
-         'configured class count (%d).'], ...
-        numel(netClasses), ...
-        numel(classes));
-
-end
-
-%% ============================================================
-% VERIFY NETWORK CLASS ORDER
-% ============================================================
-
-if ~isequal( ...
-        netClasses(:), ...
-        classes(:))
-
-    error( ...
-        ['Network class order does not match the configured ', ...
-         'class order.\n\nNetwork classes:\n%s\n\n', ...
-         'Configured classes:\n%s'], ...
-        strjoin(netClasses, ", "), ...
-        strjoin(classes, ", "));
-
-end
-
-%% ============================================================
 % FORCE ALL METRICS TO COLUMN VECTORS
 % ============================================================
 
@@ -597,11 +596,6 @@ fprintf( ...
 % CREATE METRICS TABLE
 % ============================================================
 
-%
-% IMPORTANT FIX:
-% Every variable is explicitly converted to an 8 x 1 vector.
-%
-
 metricsTable = table( ...
     classesColumn, ...
     support, ...
@@ -661,194 +655,6 @@ if ~exist(resultsFolder, "dir")
 end
 
 %% ============================================================
-% PER-CLASS UNKNOWN THRESHOLD CALIBRATION
-% ============================================================
-
-disp(" ");
-disp("====================================");
-disp("CALIBRATING PER-CLASS THRESHOLDS");
-disp("====================================");
-
-%% Threshold percentile
-
-thresholdPercentile = 10;
-
-%% Storage
-
-classThresholds = ...
-    zeros(numClasses, 1);
-
-correctSampleCount = ...
-    zeros(numClasses, 1);
-
-minimumCorrectConfidence = ...
-    zeros(numClasses, 1);
-
-maximumCorrectConfidence = ...
-    zeros(numClasses, 1);
-
-%% ============================================================
-% CALCULATE THRESHOLD FOR EVERY CLASS
-% ============================================================
-
-%
-% IMPORTANT:
-% Use the trained network's actual output class order.
-% This guarantees that score column i corresponds to
-% network class i.
-%
-
-for i = 1:numClasses
-
-    %% Current network class
-
-    currentClass = ...
-        netClasses(i);
-
-    %% True class samples
-
-    trueClassMask = ...
-        string(YTrue) == currentClass;
-
-    %% Predicted class samples
-
-    predictedClassMask = ...
-        string(YPred) == currentClass;
-
-    %% Correct samples
-
-    correctMask = ...
-        trueClassMask & ...
-        predictedClassMask;
-
-    %% Correct-class confidence
-    %
-    % IMPORTANT:
-    % validationScores(:,i) corresponds to the
-    % current network class because netClasses
-    % is taken directly from the trained network.
-
-    correctConfidences = ...
-        validationScores( ...
-            correctMask, ...
-            i);
-
-    %% Number of correct examples
-
-    correctSampleCount(i) = ...
-        numel(correctConfidences);
-
-    if ~isempty(correctConfidences)
-
-        %% Threshold
-
-        classThresholds(i) = ...
-            prctile( ...
-                correctConfidences, ...
-                thresholdPercentile);
-
-        %% Minimum confidence
-
-        minimumCorrectConfidence(i) = ...
-            min(correctConfidences);
-
-        %% Maximum confidence
-
-        maximumCorrectConfidence(i) = ...
-            max(correctConfidences);
-
-    else
-
-        %% Fallback for a class with no correct validation examples
-
-        classThresholds(i) = ...
-            0.70;
-
-        minimumCorrectConfidence(i) = ...
-            0;
-
-        maximumCorrectConfidence(i) = ...
-            0;
-
-    end
-
-    fprintf( ...
-        "%s : %.2f%% threshold | %d correct samples\n", ...
-        currentClass, ...
-        classThresholds(i) * 100, ...
-        correctSampleCount(i));
-
-end
-
-%% ============================================================
-% FORCE THRESHOLD VECTORS TO COLUMN FORMAT
-% ============================================================
-
-correctSampleCount = ...
-    double(correctSampleCount(:));
-
-minimumCorrectConfidence = ...
-    double(minimumCorrectConfidence(:));
-
-maximumCorrectConfidence = ...
-    double(maximumCorrectConfidence(:));
-
-classThresholds = ...
-    double(classThresholds(:));
-
-%% ============================================================
-% THRESHOLD TABLE
-% ============================================================
-
-thresholdTable = table( ...
-    classesColumn, ...
-    correctSampleCount, ...
-    minimumCorrectConfidence * 100, ...
-    maximumCorrectConfidence * 100, ...
-    classThresholds * 100, ...
-    'VariableNames', { ...
-        'Class', ...
-        'CorrectSamples', ...
-        'MinimumCorrectConfidence', ...
-        'MaximumCorrectConfidence', ...
-        'ThresholdPercent'});
-
-disp(" ");
-disp("Per-Class Confidence Thresholds:");
-disp(thresholdTable);
-
-%% ============================================================
-% SAVE THRESHOLDS MAT
-% ============================================================
-
-thresholdMATPath = fullfile( ...
-    resultsFolder, ...
-    "per_class_thresholds.mat");
-
-thresholdClasses = classesColumn;
-
-save( ...
-    thresholdMATPath, ...
-    "classThresholds", ...
-    "thresholdClasses", ...
-    "thresholdPercentile", ...
-    "correctSampleCount", ...
-    "minimumCorrectConfidence", ...
-    "maximumCorrectConfidence");
-
-%% ============================================================
-% SAVE THRESHOLDS CSV
-% ============================================================
-
-thresholdCSVPath = fullfile( ...
-    resultsFolder, ...
-    "per_class_thresholds.csv");
-
-writetable( ...
-    thresholdTable, ...
-    thresholdCSVPath);
-
-%% ============================================================
 % SAVE METRICS CSV
 % ============================================================
 
@@ -869,13 +675,11 @@ summaryTable = table( ...
     double(macroPrecision), ...
     double(macroRecall), ...
     double(macroF1), ...
-    double(thresholdPercentile), ...
     'VariableNames', { ...
         'OverallAccuracy', ...
         'MacroPrecision', ...
         'MacroRecall', ...
-        'MacroF1', ...
-        'ThresholdPercentile'});
+        'MacroF1'});
 
 summaryCSVPath = fullfile( ...
     resultsFolder, ...
@@ -1011,12 +815,6 @@ disp(summaryCSVPath);
 disp("Validation summary MAT:");
 disp(summaryMATPath);
 
-disp("Per-class thresholds MAT:");
-disp(thresholdMATPath);
-
-disp("Per-class thresholds CSV:");
-disp(thresholdCSVPath);
-
 disp(" ");
 disp("====================================");
 disp("TRAINING COMPLETE");
@@ -1024,10 +822,6 @@ disp("====================================");
 
 disp("Model saved to:");
 disp(modelPath);
-
-disp(" ");
-disp("Per-class UNKNOWN detection thresholds");
-disp("have been calibrated from the validation set.");
 
 end
 
