@@ -1,58 +1,32 @@
-# RF Signal Classification using Deep Learning and Grad-CAM
+# RF Signal Classification using Deep Learning
 
-A MATLAB-based deep learning system for classifying Radio Frequency (RF) signal spectrogram images into multiple RF signal categories.
+An AI-based MATLAB project for classifying RF (Radio Frequency) signal images using a fine-tuned MobileNetV2 deep-learning model.
 
-The project uses **MobileNetV2 transfer learning**, RF-specific data augmentation, confidence-based UNKNOWN signal rejection, Grad-CAM explainability, automated evaluation, and a user-friendly visual testing interface.
-
-The system is designed as an end-to-end RF signal classification pipeline rather than only a model-training experiment.
+The system accepts an RF signal image / spectrogram-like representation and predicts which of the supported RF signal classes it belongs to.
 
 ---
 
-# 1. Project Overview
+## Project Overview
 
-Radio Frequency signals contain important information in the time and frequency domains.
+Radio-frequency signals from different communication systems can have different visual patterns when represented as signal images or spectrograms.
 
-A common way to represent an RF signal is through a **spectrogram**, where:
+This project uses those visual patterns for classification.
 
-- X-axis represents time
-- Y-axis represents frequency
-- Pixel intensity/color represents signal energy
-
-This project treats RF spectrograms as images and uses a deep convolutional neural network to classify them.
-
-The complete system performs:
+### Basic workflow
 
 ```text
-RF Spectrogram Image
-        |
-        v
-Image Selection
-        |
-        v
+RF Signal Image
+       ↓
 Image Preprocessing
-        |
-        v
-MobileNetV2-based Classifier
-        |
-        v
-Class Probabilities
-        |
-        v
-Confidence Evaluation
-        |
-        +----------------------+
-        |                      |
-        v                      v
-Confidence >= Threshold    Confidence < Threshold
-        |                      |
-        v                      v
-   KNOWN SIGNAL              UNKNOWN
-        |
-        v
-     Grad-CAM
-        |
-        v
-Visual Result Dashboard
-        |
-        v
-Final Report
+       ↓
+224 × 224 × 3 RGB Image
+       ↓
+MobileNetV2
+       ↓
+8-Class Classifier
+       ↓
+Prediction + Confidence
+       ↓
+Top Predictions
+       ↓
+UNKNOWN decision when confidence is below threshold
