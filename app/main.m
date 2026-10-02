@@ -134,7 +134,7 @@ function main()
                 ['Prediction: ' char(predictedClass)];
 
             confidenceLabel.Text = ...
-                sprintf('Confidence: %.2f%%', confidence);
+                sprintf('Confidence: %.2f%%', confidence * 100);
 
             %% Display Top 3 Predictions
 
