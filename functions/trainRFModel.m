@@ -477,10 +477,54 @@ for i = 1:numClasses
 end
 
 %% ============================================================
+% GET NETWORK CLASS ORDER
+% ============================================================
+
+%
+% IMPORTANT:
+% The trained network's actual output class order is the
+% source of truth for confidence-score columns.
+%
+
+netClasses = string( ...
+    net.Layers(end).Classes);
+
+%% ============================================================
+% VERIFY NETWORK CLASS COUNT
+% ============================================================
+
+if numel(netClasses) ~= numel(classes)
+
+    error( ...
+        ['Network class count (%d) does not match the ', ...
+         'configured class count (%d).'], ...
+        numel(netClasses), ...
+        numel(classes));
+
+end
+
+%% ============================================================
+% VERIFY NETWORK CLASS ORDER
+% ============================================================
+
+if ~isequal( ...
+        netClasses(:), ...
+        classes(:))
+
+    error( ...
+        ['Network class order does not match the configured ', ...
+         'class order.\n\nNetwork classes:\n%s\n\n', ...
+         'Configured classes:\n%s'], ...
+        strjoin(netClasses, ", "), ...
+        strjoin(classes, ", "));
+
+end
+
+%% ============================================================
 % FORCE ALL METRICS TO COLUMN VECTORS
 % ============================================================
 
-classesColumn = string(classes(:));
+classesColumn = string(netClasses(:));
 
 support = double(support(:));
 
@@ -647,17 +691,29 @@ maximumCorrectConfidence = ...
 % CALCULATE THRESHOLD FOR EVERY CLASS
 % ============================================================
 
+%
+% IMPORTANT:
+% Use the trained network's actual output class order.
+% This guarantees that score column i corresponds to
+% network class i.
+%
+
 for i = 1:numClasses
+
+    %% Current network class
+
+    currentClass = ...
+        netClasses(i);
 
     %% True class samples
 
     trueClassMask = ...
-        string(YTrue) == classes(i);
+        string(YTrue) == currentClass;
 
     %% Predicted class samples
 
     predictedClassMask = ...
-        string(YPred) == classes(i);
+        string(YPred) == currentClass;
 
     %% Correct samples
 
@@ -666,6 +722,11 @@ for i = 1:numClasses
         predictedClassMask;
 
     %% Correct-class confidence
+    %
+    % IMPORTANT:
+    % validationScores(:,i) corresponds to the
+    % current network class because netClasses
+    % is taken directly from the trained network.
 
     correctConfidences = ...
         validationScores( ...
@@ -698,7 +759,7 @@ for i = 1:numClasses
 
     else
 
-        %% Fallback
+        %% Fallback for a class with no correct validation examples
 
         classThresholds(i) = ...
             0.70;
@@ -713,7 +774,7 @@ for i = 1:numClasses
 
     fprintf( ...
         "%s : %.2f%% threshold | %d correct samples\n", ...
-        classes(i), ...
+        currentClass, ...
         classThresholds(i) * 100, ...
         correctSampleCount(i));
 
