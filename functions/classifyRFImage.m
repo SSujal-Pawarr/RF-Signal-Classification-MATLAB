@@ -2,12 +2,27 @@ function [predictedLabel, confidence, scores] = classifyRFImage(imageInput, net)
 % CLASSIFYRFIMAGE
 % Classifies an RF spectrogram and supports UNKNOWN detection.
 %
-% Output:
+% Inputs:
+%   imageInput - image file path or image matrix
+%   net        - trained MATLAB classification network
+%
+% Outputs:
 %   predictedLabel - predicted RF class or "UNKNOWN"
 %   confidence     - highest model confidence
-%   scores         - probability scores for all classes
+%   scores         - probability scores for all trained classes
+%
+% UNKNOWN detection:
+%   The threshold is loaded from:
+%       results/unknown_threshold.mat
+%
+%   The threshold must be calibrated beforehand using
+%   calibrateUnknownThreshold.m.
+%
+%   No hardcoded UNKNOWN threshold is used.
 
-%% Load image
+%% ---------------------------------------------------------
+% 1. Read input image
+% ----------------------------------------------------------
 
 if ischar(imageInput) || isstring(imageInput)
 
@@ -23,23 +38,26 @@ else
 
 end
 
-%% Preprocess
+
+%% ---------------------------------------------------------
+% 2. Preprocess image
+% ----------------------------------------------------------
 
 inputImage = preprocessRFImage(inputImage);
 
-%% Classification
 
-[predictedLabel, scores] = classify(net,inputImage);
+%% ---------------------------------------------------------
+% 3. Classify image
+% ----------------------------------------------------------
 
-%% Convert scores to double
-
-scores = double(scores);
-
-%% Get confidence
+[predictedLabel, scores] = classify(net, inputImage);
 
 confidence = max(scores);
 
-%% Load calibrated UNKNOWN threshold
+
+%% ---------------------------------------------------------
+% 4. Locate UNKNOWN threshold file
+% ----------------------------------------------------------
 
 projectRoot = fileparts(fileparts(mfilename('fullpath')));
 
@@ -48,24 +66,65 @@ thresholdPath = fullfile( ...
     'results', ...
     'unknown_threshold.mat');
 
-if isfile(thresholdPath)
 
-    data = load(thresholdPath,'threshold');
+%% ---------------------------------------------------------
+% 5. Require calibrated threshold
+% ----------------------------------------------------------
 
-    if ~isfield(data,'threshold')
-        error('unknown_threshold.mat does not contain "threshold".');
-    end
+if ~isfile(thresholdPath)
 
-    unknownThreshold = data.threshold;
-
-else
-
-    % Safe fallback if calibration file does not exist
-    unknownThreshold = 0.9305;
+    error([ ...
+        'UNKNOWN threshold file not found: %s\n' ...
+        'Run calibrateUnknownThreshold before using UNKNOWN detection.' ...
+        ], thresholdPath);
 
 end
 
-%% UNKNOWN detection
+
+%% ---------------------------------------------------------
+% 6. Load calibrated threshold
+% ----------------------------------------------------------
+
+data = load(thresholdPath, 'threshold');
+
+
+if ~isfield(data, 'threshold')
+
+    error( ...
+        'unknown_threshold.mat does not contain "threshold".');
+
+end
+
+
+unknownThreshold = data.threshold;
+
+
+%% ---------------------------------------------------------
+% 7. Validate threshold
+% ----------------------------------------------------------
+
+if ~isscalar(unknownThreshold) || ...
+        ~isnumeric(unknownThreshold) || ...
+        ~isfinite(unknownThreshold)
+
+    error( ...
+        'Invalid UNKNOWN threshold in unknown_threshold.mat.');
+
+end
+
+
+if unknownThreshold < 0 || unknownThreshold > 1
+
+    error( ...
+        'UNKNOWN threshold must be between 0 and 1. Current value: %.6f', ...
+        unknownThreshold);
+
+end
+
+
+%% ---------------------------------------------------------
+% 8. UNKNOWN decision
+% ----------------------------------------------------------
 
 if confidence < unknownThreshold
 
