@@ -1,0 +1,1 @@
+Open the folder in MATLAB and run `runProject`. The first run generates data and trains the 1-D CNN. Later runs reuse the saved files. Custom MAT inputs are in custom_inputs/. They are realistic-style SYNTHETIC data, not real RF recordings.
