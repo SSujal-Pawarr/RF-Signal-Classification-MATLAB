@@ -8,7 +8,6 @@ load(fullfile(projectPath,'models','wirelessIQ2DClassifier.mat'),'net','classNam
 predictedLabels=classify(net,dataset.XTest);
 trueLabels=dataset.YTest;
 accuracy=mean(predictedLabels==trueLabels)*100;
-
 correct=sum(predictedLabels==trueLabels);
 total=numel(trueLabels);
 
