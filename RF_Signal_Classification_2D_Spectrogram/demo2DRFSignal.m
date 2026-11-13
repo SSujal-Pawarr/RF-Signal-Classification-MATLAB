@@ -73,7 +73,6 @@ fprintf('       FOUR-CLASS 2-D RF CLASSIFICATION DEMO\n');
 fprintf('====================================================\n');
 
 fprintf('\nAvailable input options:\n\n');
-
 fprintf('1. WLAN test sample\n');
 fprintf('2. BluetoothLE test sample\n');
 fprintf('3. LoRa test sample\n');
